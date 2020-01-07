@@ -14,6 +14,7 @@
    
    스크린샷
    ------------------
+   <div>
   1. <Strong>메인화면</Strong>
    ![Alt 메인](https://user-images.githubusercontent.com/53854831/70104944-e9113500-1682-11ea-9552-267c2f75f739.png)
   2. <Strong>메인화면2</Strong>
@@ -25,3 +26,4 @@
   5. <Strong>게시판 글쓰기</Strong>
    ![Alt 모달창](https://user-images.githubusercontent.com/53854831/70104996-0f36d500-1683-11ea-99ae-53d1505cd9a1.png)
    
+</div>
