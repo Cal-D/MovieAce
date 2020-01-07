@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- 참고사이트: https://to-dy.tistory.com/20?category=700248 -->
+	<!-- Appenders --><!-- 로그 출력 위치, 형식 지정 -->
+	<appender name="console" class="org.apache.log4j.ConsoleAppender"><!-- 콘솔에 로그를 출력하는 Appender -->
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout"><!-- 로그 출력 형태 지정 -->
+			<!-- <param name="ConversionPattern" value="%-5p: %c - %m%n" /> -->
+			<!-- %d:이벤트 발생날짜, %p:priority, %c:패키지, %m:로그내용출력, %n:\n -->
+			<param name="ConversionPattern" value="%d %5p [%c] %m%n"/>
+		</layout>
+	</appender>
+	
+	<!-- Appender 추가 -->
+	<appender name="console-infolog" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %5p %m%n"/>
+		</layout>
+	</appender>
+	
+	
+	<!-- Application Loggers -->
+	<!-- 실제 로그 기능을 수행하는 개체, level에 따라 Appender로 전달-->
+	<!-- <logger name="com.movie.ace" additivity="false">additivity 상위 Appender 상속 여부
+		<level value="debug" />
+		<appender-ref ref="console"/>
+	</logger> -->
+	
+	<!-- Query Loggers -->
+	<!-- <logger name="jdbc.sqlonly" additivity="false">
+		<level value="info"/>
+		<appender-ref ref="console-infolog"/>
+	</logger> -->
+		
+	<!-- Connection Loggers -->
+	<!-- <logger name="jdbc.connection" additivity="false">
+		<level value="info"/>
+		<appender-ref ref="console-infolog"/>
+	</logger>
+	
+	<logger name="com.zaxxer.hikari" additivity="false">
+		<level value="debug"/>
+		<appender-ref ref="console-infolog"/>
+	</logger> -->
+	
+	<!-- 3rdparty Loggers -->
+<!-- 	<logger name="org.springframework.core">
+		<level value="info" />
+	</logger>
+	
+	<logger name="org.springframework.beans">
+		<level value="info" />
+	</logger>
+	
+	<logger name="org.springframework.context">
+		<level value="info" />
+	</logger>
+
+	<logger name="org.springframework.web">
+		<level value="info" />
+	</logger> -->
+
+	<!-- Root Logger -->
+	<root>
+		<priority value="off" /><!-- level value="" -->
+		<appender-ref ref="console" />
+	</root>
+	
+</log4j:configuration>

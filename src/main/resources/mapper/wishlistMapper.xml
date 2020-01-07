@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.ace.wishlist.WishListMapper">
+
+	<select id ="getWishList"
+ 	parameterType="com.movie.ace.wishlist.WishList"
+ 	resultType="com.movie.ace.wishlist.WishList">
+ 	select moviecd,title,director,actor,opendt,runtime,genre,plot,poster,audiacc 
+ 	from MovieDB
+	where moviecd IN (
+		select moviecd 
+		from MovieWishList 
+		where member_no = #{member_no} <!--#{member_no}으로 바꾸면 된다. -->
+		)
+		 
+		
+	</select>
+	
+	<select id="getBoxOffice"
+	parameterType="com.movie.ace.wishlist.WishList"
+	resultType="com.movie.ace.wishlist.WishList">
+	select moviecd,title,director,actor,opendt,runtime,genre,plot,poster,audiacc
+	from MovieDB 
+	where audiacc > 180000 
+	order by opendt desc, audiacc desc 
+	limit 5
+	</select>
+	
+	<delete id="delWishList"
+	 parameterType="com.movie.ace.wishlist.WishList"
+	>
+	 delete from MovieWishList where member_no = #{member_no} and moviecd = #{moviecd}
+	
+	</delete>	 
+	 
+	
+	<select id ="getDetail"
+ 	parameterType="com.movie.ace.wishlist.WishList"
+ 	resultType="com.movie.ace.wishlist.WishList">
+ 	select moviecd,title,director,actor,opendt,runtime,genre,plot,poster,audiacc 
+ 	from MovieDB
+	where moviecd = #{moviecd}
+	</select>
+	
+	<insert id ="setMovieReply"
+	 parameterType="com.movie.ace.wishlist.ModalWrite">
+	  insert into MovieRate(moviecd,member_no,movie_rate,movie_reply)
+	  values(#{moviecd},#{member_no},#{movie_rate},#{movie_reply})
+	 </insert>
+	 
+	<insert id ="insertWishList"
+	 parameterType="com.movie.ace.wishlist.WishList">
+	 insert into MovieWishList values(#{member_no},#{moviecd})
+	 </insert>
+	  
+	 <select id="getMovieReply"
+	 parameterType="com.movie.ace.wishlist.ModalGetReplys"
+	 resultType="com.movie.ace.wishlist.ModalGetReplys">
+	 select Mem.member_id,Movie.movie_rate,Movie.movie_reply from MovieRate Movie join Member Mem on Movie.member_no = Mem.member_no where Movie.moviecd = #{moviecd}
+	 </select>
+	 
+	 <select id="checkBeforeInsert"
+	 parameterType="com.movie.ace.wishlist.WishList"
+	 resultType="int">
+	 select count(*) from MovieWishList where member_no = #{member_no} and moviecd = #{moviecd}
+	 </select>
+	 
+	<select id="checkMovieDb" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select count(*) from movieprojectDB.MovieDB where moviecd = #{moviecd}	
+	</select>
+	
+	<insert id = "insertMovieDB" parameterType="com.movie.ace.wishlist.WishList">
+		insert into MovieDB(moviecd, title, director, actor, opendt, runtime, genre, plot, poster, audiacc) values 
+			(#{moviecd},#{title},#{director},#{actor},#{opendt},#{runtime},#{genre},#{plot},#{poster},#{audiacc})
+	</insert>
+
+</mapper>

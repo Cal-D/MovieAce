@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="member">
+	<!-- 이메일로 회원 조회 -->
+	 <select id="selectByEmail" resultType="com.movie.ace.member.MemberVO">
+        <![CDATA[
+          SELECT
+              member_email,
+              member_name
+          FROM
+              Member
+          WHERE
+              member_email = #{email}       
+      ]]> 
+    </select>
+    
+    <!-- 아이디로 회원 조회 -->
+    <select id="selectById" resultType="com.movie.ace.member.MemberVO">
+        <![CDATA[
+          SELECT
+              member_email,
+              member_name
+          FROM
+              Member
+          WHERE
+              member_id = #{id}       
+      ]]>
+    </select>
+    
+    <!-- 로그인시 해당 회원 정보 가져오기 -->
+    <select id="loginCheck" resultType="com.movie.ace.member.CustomUserDetails">
+    	<![CDATA[ 
+          select M.*, A.authority from Member M inner join authorities A on M.member_no = A.member_no where M.member_id= #{id};
+      ]]>
+    </select>
+    
+    <!-- 회원가입 아이디 중복 체크 -->
+    <select id="idCheck" resultType="Integer">
+    	<![CDATA[
+    		SELECT COUNT(*) FROM Member WHERE member_id = #{id}
+    	]]>
+    </select>
+    
+    <!-- 회원가입 마지막 회원 번호 가져오기 -->
+    <select id="noCheck" resultType="com.movie.ace.member.MemberVO">
+    	<![CDATA[
+    		select member_no from Member where member_no = (select max(member_no) from Member)
+    	]]>
+    </select>
+    
+    <!-- 회원 수 가져오기 -->
+  	<select id="memberCount" resultType="int">
+    	select count(*) from Member M inner join authorities A on M.member_no = A.member_no where M.enabled = 1
+  	</select>
+    
+    <!-- 회원 정보 가져오기 -->
+    <select id="memberList" resultType="com.movie.ace.member.MemberVO">
+		 select
+		 	M.member_no, 
+		 	M.member_id,
+		 	M.member_email,
+		 	M.member_name,
+		 	M.member_birth,
+		 	M.genres,
+		 	M.postcode,
+		 	M.address,
+		 	M.detailAddress,
+		 	M.extraAddress,
+		 	M.member_recent_login,
+		 	M.member_recent_logout,
+		 	M.reg_date,
+		 	M.enabled,
+		 	A.authority 
+		 from Member M inner join authorities A 
+		 on M.member_no = A.member_no
+		 where M.enabled = 1
+		 limit #{start}, #{end}
+	</select>
+	
+	<!-- 블랙회원 수 가져오기 -->
+  	<select id="blackMemberCount" resultType="int">
+    	select count(*) from Member M inner join authorities A on M.member_no = A.member_no where M.enabled = 0
+  	</select>
+    
+    <!-- 블랙회원 정보 가져오기 -->
+    <select id="blackMemberList" resultType="com.movie.ace.member.MemberVO">
+		 select
+		 	M.member_no, 
+		 	M.member_id,
+		 	M.member_email,
+		 	M.member_name,
+		 	M.member_birth,
+		 	M.genres,
+		 	M.postcode,
+		 	M.address,
+		 	M.detailAddress,
+		 	M.extraAddress,
+		 	M.member_recent_login,
+		 	M.member_recent_logout,
+		 	M.reg_date,
+		 	M.enabled,
+		 	A.authority 
+		 from Member M inner join authorities A 
+		 on M.member_no = A.member_no
+		 where M.enabled = 0
+		 limit #{start}, #{end}
+	</select>
+    
+    <!-- 로그인 날짜 업데이트 -->
+    <update id="updateLoginDate">
+    	<![CDATA[
+    		update Member set member_recent_login = SYSDATE()
+    			where member_id = #{id}
+    	]]>
+    </update>
+    
+    <!-- 로그아웃 날짜 업데이트 -->
+    <update id="updateLogoutDate">
+    	<![CDATA[
+    		update Member set member_recent_logout = SYSDATE()
+    			where member_id = #{id}
+    	]]>
+    </update>
+    
+    <!-- 회원 차단하기 -->
+    <update id="blockMember">
+    	<![CDATA[
+    		update Member set enabled = 0
+    			where member_no = #{mno}
+    	]]>
+    </update>
+    
+    <!-- 회원 부활시키기 -->
+    <update id="unlockMember">
+    	<![CDATA[
+    		update Member set enabled = 1
+    			where member_no = #{mno}
+    	]]>
+    </update>
+    
+    <!-- 회원 정보 수정 -->
+    <update id="updateMember">
+    	<![CDATA[
+    		update Member set 
+    			member_pw =#{pw},
+    			genres =#{genres},
+    			postcode = #{postcode},
+    			address = #{address},
+    			detailAddress = #{detailAddress},
+    			extraAddress = #{extraAddress}
+    			where member_id =#{id}
+    	]]>
+    </update>
+    
+    <!-- 회원 가입 -->
+    <insert id="register">
+        <![CDATA[
+            INSERT INTO Member
+            (
+            	member_no,
+            	member_id,
+                member_pw,
+                member_email,
+                member_name,
+                member_birth,
+                genres,
+                postcode,
+                address,
+                detailaddress,
+                extraaddress,
+                reg_date
+            )
+            VALUES
+            (	
+            	#{member_no},
+            	#{id},
+            	#{pw},
+                #{email},
+                #{name},
+                #{birth},
+                #{genres},
+                #{postcode},
+                #{address},
+                #{detailAddress},
+                #{extraAddress},
+                SYSDATE()
+            )
+        ]]>
+    </insert>
+    
+    <!-- 회원가입시 권한 추가하기 -->
+    <insert id="authority">
+     insert into authorities
+            (
+            	member_no
+            )
+            values
+            (
+            	#{member_no}
+            )
+    </insert>
+
+</mapper>

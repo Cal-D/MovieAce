@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.movie.ace.rate.RateMapper"><!-- 인터페이스자리 -->
+	<select id="checkBeforeInsert"
+		parameterType="com.movie.ace.rate.RateVO"
+		resultType="int">
+	select count(*) from MovieRate where member_no = #{member_no} and moviecd = #{moviecd}
+	</select>
+
+
+	<insert id ="writeReply"
+	 parameterType="com.movie.ace.rate.RateVO">
+	  insert into MovieRate(moviecd,member_no,movie_rate,movie_reply,movie_reply_date)
+	  values(#{moviecd},#{member_no},#{movie_rate},#{movie_reply},current_timestamp)
+	 </insert>
+	 
+	<select id="getReply" parameterType="com.movie.ace.rate.RateVO" resultType="com.movie.ace.rate.RateVO">
+	 
+	 	select Mem.member_id,Movie.movie_rate,Movie.movie_reply 
+	 	from MovieRate Movie 
+	 	join movieprojectDB.Member Mem on Movie.member_no = Mem.member_no 
+	 	where Movie.moviecd = #{moviecd}
+	 </select>
+	 
+	<select id="getReplyCount" resultType="java.lang.Integer">
+		select count(*) from MovieRate where moviecd = #{moviecd}	
+	</select>	
+	
+	<select id="checkDb" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		select count(*) from movieprojectDB.MovieDB where moviecd = #{moviecd}	
+	</select>
+	
+	<insert id = "insertMovieDB" parameterType="com.movie.ace.rate.RateVO">
+		insert into MovieDB(moviecd, title, director, actor, opendt, runtime, genre, plot, poster, audiacc) values 
+			(#{moviecd},#{movieNm},#{director},#{actors},#{openDate},#{runtime},#{genres},#{plot},#{thumnailURL},null)
+	</insert>
+	 
+</mapper>

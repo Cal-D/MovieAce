@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd
+							http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+							http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+        
+        <context:component-scan base-package="com.movie.ace" />
+        
+        <security:http auto-config="true" use-expressions="true">
+        	<security:intercept-url pattern="/resources/**" access="permitAll"/>
+        	<security:intercept-url pattern="/signUp" access="isAnonymous()"/>
+        	<security:intercept-url pattern="/loginPage" access="isAnonymous()"/>
+            <security:intercept-url pattern="/**" access="permitAll" />
+            
+            <security:form-login
+            	login-processing-url="/login"
+            	login-page="/loginPage"
+            	username-parameter="id"
+            	password-parameter="password"
+            	authentication-success-handler-ref="loginSuccessHandler"
+            />
+            
+            <security:logout
+            	logout-url="/logout"
+            	success-handler-ref="logoutSuccessHandler"
+            	invalidate-session="false"
+            />
+            
+            <security:access-denied-handler error-page="/access_denied_page"/>
+            
+        </security:http>
+        
+       <!--  <jdbc-user-service data-source-ref="dataSource" id="userService"
+        	users-by-username-query="select member_id as username, member_password as password, enabled from MEMBER where member_id=?"
+        	authorities-by-username-query="select member_id as username, authority from authorities where member_id=?"
+        /> -->
+        
+        <security:authentication-manager>
+        
+        	<security:authentication-provider ref="userAuthProvider"/>
+            <security:authentication-provider user-service-ref="userService">
+            </security:authentication-provider>
+            
+        </security:authentication-manager>
+        
+        <bean id="userService" class="com.movie.ace.member.CustomUserDetailsService"/>
+        <!-- DB 암호화 -->
+		<bean id="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+		<!-- 비밀번호 체크 -->
+        <bean id="userAuthProvider" class="com.movie.ace.member.CustomAuthenticationProvider"/>
+        <!-- 로그인 성공시 실행되는 핸들러 -->
+        <bean id="loginSuccessHandler" class="com.movie.ace.member.LoginSuccessHandler">
+        	<property name="loginId" value="id"/>
+        	<property name="password" value="password"/>
+        	<property name="defaultUrl" value="/"/>
+        </bean> 
+        <!-- 로그아웃 핸들러 -->
+   		<bean id="logoutSuccessHandler" class="com.movie.ace.member.CustomLogoutSuccessHandler"/>
+</beans>

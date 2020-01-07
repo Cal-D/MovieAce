@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="board">
+  <!-- 게시글 전체 목록 조회 -->
+  <select id="listAll" resultType="com.movie.ace.board.BoardVO">
+    <include refid="pagingHeader"></include>
+    SELECT @rownum:=@rownum+1 rownum,(
+    SELECT COUNT(*) FROM MovieReply
+    where mboard_no=MovieBoard.mboard_no
+    ) as mboard_reply_cnt,
+    MovieBoard.mboard_no, MovieBoard.mboard_title,
+    MovieBoard.mboard_content,MovieBoard.mboard_header,MovieBoard.moviecd,MovieBoard.mboard_hit_cnt,MovieBoard.mboard_like_cnt,MovieBoard.mboard_dislike_cnt,MovieBoard.mboard_reg_date,MovieBoard.member_no,MovieBoard.mboard_report_cnt,
+    Member.member_id FROM MovieBoard inner join Member on
+    MovieBoard.member_no = Member.member_no, (select @rownum:=0)Tmp
+    where MovieBoard.mboard_header !="공지"
+    <include refid="search"></include>
+    ORDER BY mboard_no desc, mboard_reg_date desc
+    <include refid="pagingFooter"></include>
+  </select>
+
+  <!-- 공지글 목록 -->
+  <select id="noticeAll" resultType="com.movie.ace.board.BoardVO">
+    select rownum as rn, A.*from(
+    SELECT @rownum:=@rownum+1 rownum,(
+    SELECT COUNT(*) FROM MovieReply where mboard_no=MovieBoard.mboard_no
+    ) as mboard_reply_cnt, MovieBoard.mboard_no, MovieBoard.mboard_title,
+    MovieBoard.mboard_content,MovieBoard.mboard_header,MovieBoard.moviecd,MovieBoard.mboard_hit_cnt,MovieBoard.mboard_like_cnt,MovieBoard.mboard_dislike_cnt,MovieBoard.mboard_reg_date,MovieBoard.member_no,MovieBoard.mboard_report_cnt,
+    Member.member_id FROM MovieBoard inner join Member on
+    MovieBoard.member_no = Member.member_no, (select @rownum:=0)Tmp
+    where MovieBoard.mboard_header ="공지"
+    ORDER BY mboard_no desc, mboard_reg_date desc
+    ) A
+  </select>
+
+
+  <!-- 게시글 레코드 갯수 -->
+  <select id="countArticle" resultType="int">
+    select count(*) from MovieBoard B inner join Member M on B.member_no
+    = M.member_no
+    <include refid="search"></include>
+  </select>
+  <!-- 검색 조건 -->
+  <sql id="search">
+    <choose>
+      <when test="searchOption == 'all'">
+        and
+        (member_id like '%'"${keyword}"'%'
+        OR
+        mboard_content like
+        '%'"${keyword}"'%'
+        OR mboard_title like
+        '%'"${keyword}"'%')
+      </when>
+      <otherwise>
+        and (${searchOption} like '%'"${keyword}"'%')
+      </otherwise>
+    </choose>
+  </sql>
+
+  <!-- 페이징 -->
+  <sql id="pagingHeader">
+    select *from(select rownum as rn, A.*from(
+  </sql>
+  <sql id="pagingFooter">
+    ) A
+    )B where rn limit 10 offset ${start} <!-- limit 몇개보여줄건지 offset 페이지넘버 -->
+  </sql>
+
+
+  <!-- 게시글 작성 -->
+  <insert id="insert">
+    insert into MovieBoard(
+    mboard_header,
+    mboard_title,
+    mboard_content,
+    member_no
+    )values(
+    #{mboard_header},
+    #{mboard_title},
+    #{mboard_content},
+    #{member_no}
+    )
+  </insert>
+
+  <!-- 공자사항 작성 -->
+  <insert id="notice_insert">
+    insert into TestBoard(
+    mboard_header,
+    mboard_title,
+    mboard_content,
+    member_no
+    )values(
+    #{mboard_header},
+    #{mboard_title},
+    #{mboard_content},
+    #{member_no}
+    )
+  </insert>
+
+  <!-- 게시글 상세보기 조회 -->
+  <select id="view" resultType="com.movie.ace.board.BoardVO">
+    SELECT Member.member_id, B.* FROM
+    MovieBoard B inner join Member
+    WHERE mboard_no = #{mboard_no} and
+    Member.Member_no = B.member_no
+  </select>
+  <!-- 게시글 수정페이지 -->
+  <select id="change" resultType="com.movie.ace.board.BoardVO">
+    SELECT * FROM MovieBoard
+    WHERE
+    mboard_no
+    = #{mboard_no}
+  </select>
+  <!-- 게시글 조회수 증가처리 -->
+  <update id="increaseViewcnt">
+    UPDATE MovieBoard SET mboard_hit_cnt=
+    mboard_hit_cnt+1
+    WHERE mboard_no =
+    #{mboard_no}
+  </update>
+  <!-- 게시글 수정처리 -->
+  <update id="update">
+    UPDATE MovieBoard SET
+    mboard_header = #{mboard_header},
+    mboard_title=#{mboard_title},
+    mboard_content = #{mboard_content}
+    WHERE mboard_no = #{mboard_no}
+  </update>
+ 
+  <!-- 게시글 삭제처리 -->
+  <delete id="deleteArticle">
+    DELETE FROM MovieBoard
+    WHERE mboard_no = #{mboard_no}
+  </delete>
+  <delete id="deleteReply">
+    delete from MovieReply where mboard_no =
+    #{mboard_no}
+  </delete>
+
+
+  <!-- 좋아요 증가처리 -->
+  <update id="mboard_like">
+    UPDATE MovieBoard SET mboard_like_cnt=
+    mboard_like_cnt+1
+    WHERE mboard_no =
+    #{mboard_no}
+  </update>
+
+  <!-- 신고 증가처리 -->
+  <update id="mboard_report">
+    UPDATE MovieBoard SET mboard_report_cnt=
+    mboard_report_cnt+1
+    WHERE mboard_no =
+    #{mboard_no}
+  </update>
+
+  <!-- 댓글 입력 -->
+  <insert id="insertReply">
+    Insert into MovieReply(mboard_no, mreply_content,
+    member_no)
+    VALUES (#{mboard_no}, #{mreply_content}, #{member_no})
+  </insert>
+
+  <!-- 댓글 목록 -->
+  <select id="listReply" resultType="com.movie.ace.board.ReplyVO">
+    SELECT mboard_rno, mboard_no,
+    mreply_content, m.member_id,
+    r.mreply_reg_date,
+    mreply_like_cnt,mreply_dislike_cnt,mreply_report_cnt from MovieReply
+    r, Member m
+    where r.member_no = m.member_no and
+    mboard_no=#{mboard_no}
+    ORDER BY mboard_rno
+
+  </select>
+
+  <!-- 관리자 페이지 전용 -->
+  <select id="reportlistAll"
+    resultType="com.movie.ace.board.BoardVO">
+    select *from(select rownum as rn, A.*from(
+    SELECT
+    @rownum:=@rownum+1 rownum,(
+    SELECT COUNT(*) FROM MovieReply where
+    mboard_no=MovieBoard.mboard_no
+    ) as mboard_reply_cnt,
+    MovieBoard.mboard_no, MovieBoard.mboard_title,
+    MovieBoard.mboard_content,MovieBoard.mboard_header,MovieBoard.moviecd,MovieBoard.mboard_hit_cnt,MovieBoard.mboard_like_cnt,MovieBoard.mboard_dislike_cnt,MovieBoard.mboard_reg_date,MovieBoard.member_no,MovieBoard.mboard_report_cnt,
+    Member.member_id FROM MovieBoard inner join Member on
+    MovieBoard.member_no = Member.member_no, (select @rownum:=0)Tmp
+    where mboard_report_cnt>0
+    ORDER BY mboard_report_cnt desc
+    ) A
+    )B where rn limit 10 offset ${start};
+
+  </select>
+
+  <!-- 신고글 갯수 -->
+  <select id="reportCount" resultType="int">
+    select count(*) from
+    MovieBoard B inner join Member M on B.member_no
+    = M.member_no where
+    mboard_report_cnt>0
+  </select>
+</mapper>
+
+
