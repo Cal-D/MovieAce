@@ -51,6 +51,8 @@
   * 위시리스트
   
   ![image](https://user-images.githubusercontent.com/43934497/71903288-1895ee80-31a7-11ea-8e6e-5d0e3a31071f.png)
+  * 위시리스트 상세정보 및 댓글 기능
+  
   ![image](https://user-images.githubusercontent.com/43934497/71903309-22b7ed00-31a7-11ea-9fa8-82ea678fef63.png)
  
  
