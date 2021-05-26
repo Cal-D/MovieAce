@@ -38,16 +38,7 @@
    > [진행중](https://github.com/Cal-D/SpringStart)   
       [정리노트](https://cal-d.tistory.com/)     
           
-      
-      
-   URL
-   ------------------------
-   [MovieAce](https://180.229.1.114:8080/)
    
-   > 회원가입이 귀찮은 경우  
-       ID : batman  
-       PW : batman1234$   
-   ***
    
    ERD 
   ----------------------
